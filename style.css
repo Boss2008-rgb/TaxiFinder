@@ -1130,3 +1130,790 @@ textarea#rating-comment:focus { border-color: var(--accent); }
     .card-header h3 { font-size: 0.85rem; }
     .modal-content { padding: 1rem; }
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   TaxiGo/Finder — Visual Overhaul Patch
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  HOW TO APPLY: Paste the contents of this file at the very END  │
+   │  of your existing style.css file. These rules use CSS cascade   │
+   │  specificity to override the old palette without touching any   │
+   │  HTML IDs, classes, JS hooks, asset paths, or backend logic.    │
+   └─────────────────────────────────────────────────────────────────┘
+
+   New Palette (from reference image):
+     Primary   #6366f1  — Indigo-violet
+     Accent    #f1ee63  — Vivid yellow
+     Derived:
+       --indigo-dark   #4f52d6
+       --indigo-light  #818cf8
+       --indigo-xlight #c7d2fe
+       --yellow        #f1ee63
+       --yellow-dark   #d4d125
+       --yellow-light  #f9f7a8
+       --bg            #f5f4ff  (very light indigo tint)
+       --mist          #ede9fe
+       --text-1        #1e1b4b
+       --text-2        #4338ca
+       --text-3        #6d6aa3
+   ══════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   OBJECTIVE 1 — TOTAL COLOR SCHEME CHANGE
+   Overrides all :root CSS variables and every hardcoded color rule.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── New Brand Palette ── */
+  --navy:        #6366f1;   /* was #1a6cf5 → now indigo */
+  --navy-dark:   #4f52d6;   /* was #1052cc */
+  --navy-light:  #818cf8;   /* was #4a90f8 */
+  --sky:         #a5b4fc;   /* was #7ab3fb */
+  --sky-light:   #c7d2fe;   /* was #b3d4ff */
+  --cream:       #f5f4ff;   /* was #f0f5ff — very light indigo tint */
+  --mist:        #ede9fe;   /* was #e0eeff */
+  --white:       #FFFFFF;
+
+  /* ── New Accent ── */
+  --accent-yellow:       #f1ee63;
+  --accent-yellow-dark:  #d4d125;
+  --accent-yellow-light: #f9f7a8;
+
+  /* ── Semantic Overrides ── */
+  --bg:          var(--cream);
+  --bg-card:     rgba(245, 244, 255, 0.94);
+  --bg-glass:    rgba(245, 244, 255, 0.78);
+  --surface:     var(--white);
+  --border:      rgba(99, 102, 241, 0.15);
+  --text-1:      #1e1b4b;
+  --text-2:      #4338ca;
+  --text-3:      #6d6aa3;
+  --accent:      var(--navy);
+  --accent-alt:  var(--sky);
+  --success:     #059669;
+  --warning:     #d97706;
+  --danger:      #dc2626;
+  --sos-red:     #dc2626;
+
+  /* ── Shadow — indigo-tinted ── */
+  --shadow-sm:  0 2px 8px  rgba(99, 102, 241, 0.12);
+  --shadow-md:  0 6px 24px rgba(99, 102, 241, 0.18);
+  --shadow-lg:  0 16px 48px rgba(99, 102, 241, 0.24);
+}
+
+/* ─── Dark Mode Palette Overrides ─────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:       #100f2e;
+  --bg-card:  rgba(20, 18, 58, 0.96);
+  --bg-glass: rgba(20, 18, 58, 0.82);
+  --surface:  #1a1840;
+  --border:   rgba(165, 180, 252, 0.18);
+  --text-1:   #e0e7ff;
+  --text-2:   #a5b4fc;
+  --text-3:   #6d6aa3;
+  --accent:   var(--sky);
+  --accent-alt: var(--sky-light);
+  --shadow-sm:  0 2px 8px  rgba(0,0,0,0.4);
+  --shadow-md:  0 6px 24px rgba(0,0,0,0.5);
+  --shadow-lg:  0 16px 48px rgba(0,0,0,0.6);
+}
+
+/* ─── Preloader ──────────────────────────────────────────────────── */
+.preloader {
+  background: var(--navy-dark);
+}
+.preloader-logo { color: var(--accent-yellow); filter: drop-shadow(0 0 24px rgba(241,238,99,0.55)); }
+.preloader-city { color: var(--accent-yellow); }
+.preloader-fill { background: var(--accent-yellow); }
+
+/* ─── Auth Screen ────────────────────────────────────────────────── */
+.auth-screen { background: var(--navy-dark); }
+
+.auth-wave {
+  background: rgba(241, 238, 99, 0.07);
+}
+.auth-logo {
+  background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+  color: var(--accent-yellow);
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+}
+.auth-subtitle { color: var(--accent-yellow); }
+
+.role-tab.active {
+  background: var(--navy);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-mode-tab.active {
+  color: var(--accent-yellow);
+  border-bottom-color: var(--accent-yellow);
+}
+
+.field-wrap:focus-within {
+  border-color: var(--accent-yellow);
+  background: rgba(255,255,255,0.10);
+}
+.field-icon { filter: drop-shadow(0 0 4px rgba(241,238,99,0.25)); }
+
+/* Primary button → yellow accent */
+.btn-primary {
+  background: var(--accent-yellow);
+  color: var(--navy-dark);
+  box-shadow: 0 4px 16px rgba(241, 238, 99, 0.40);
+  font-weight: 700;
+}
+.btn-primary:hover {
+  background: var(--accent-yellow-light);
+  color: var(--navy-dark);
+  box-shadow: 0 6px 22px rgba(241, 238, 99, 0.55);
+  transform: translateY(-2px);
+}
+
+/* ─── Top Nav ────────────────────────────────────────────────────── */
+.nav-taxi-icon {
+  color: var(--navy);
+  filter: drop-shadow(0 2px 6px rgba(99,102,241,0.5));
+}
+.nav-role-badge {
+  background: rgba(99, 102, 241, 0.10);
+  color: var(--navy);
+}
+[data-theme="dark"] .nav-role-badge { background: rgba(165,180,252,0.14); color: var(--sky); }
+.nav-city { background: var(--mist); }
+
+/* ─── Map Controls ───────────────────────────────────────────────── */
+.map-ctrl-btn { color: var(--navy); }
+.map-ctrl-btn:hover {
+  background: var(--navy);
+  color: white;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.45);
+}
+
+/* ─── Icon Button ────────────────────────────────────────────────── */
+.btn-icon { background: var(--mist); color: var(--navy); }
+.btn-icon:hover {
+  background: var(--navy);
+  color: white;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+}
+
+/* ─── Ride-Type Buttons ──────────────────────────────────────────── */
+.ride-type-btn.active {
+  background: var(--navy);
+  color: white;
+  border-color: var(--accent-yellow);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+}
+.ride-type-btn.active small { color: var(--accent-yellow); }
+
+/* ─── Fare Estimate ──────────────────────────────────────────────── */
+.fare-estimate { background: rgba(99, 102, 241, 0.07); }
+.fare-row strong { color: var(--navy); }
+[data-theme="dark"] .fare-row strong { color: var(--sky-light); }
+
+/* ─── Driver / cards ─────────────────────────────────────────────── */
+.driver-count-badge {
+  background: linear-gradient(135deg, var(--navy), var(--navy-light));
+  box-shadow: 0 2px 8px rgba(99,102,241,0.45);
+}
+.driver-card:hover { border-color: var(--accent-yellow); }
+.driver-card-avatar { color: var(--navy); }
+.driver-card-dist { color: var(--navy-light); }
+
+.driver-avatar {
+  background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+  color: var(--accent-yellow);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+}
+
+/* ─── Stats bar ──────────────────────────────────────────────────── */
+.stat-val { color: var(--navy); }
+[data-theme="dark"] .stat-val { color: var(--sky-light); }
+
+/* ─── Toggle switch ──────────────────────────────────────────────── */
+.toggle-switch input:checked + .toggle-track { background: var(--navy); }
+[data-theme="dark"] .toggle-switch input:checked + .toggle-track { background: var(--accent-yellow); }
+[data-theme="dark"] .toggle-switch input:checked + .toggle-track .toggle-thumb { background: var(--navy-dark); }
+
+/* ─── Active ride progress ───────────────────────────────────────── */
+.ride-progress-fill {
+  background: linear-gradient(90deg, var(--navy), var(--accent-yellow));
+}
+.ride-status-icon { color: var(--navy); }
+.ride-driver-avatar {
+  background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+  color: var(--accent-yellow);
+}
+.ride-fare-final strong { color: var(--navy); }
+[data-theme="dark"] .ride-fare-final strong { color: var(--sky-light); }
+
+/* ─── Ride requests ──────────────────────────────────────────────── */
+.ride-req-fare { color: var(--navy); }
+[data-theme="dark"] .ride-req-fare { color: var(--sky-light); }
+.btn-accept-ride { background: var(--navy); }
+.btn-accept-ride:hover { background: var(--navy-dark); opacity: 1; }
+
+/* ─── Lang Grid ──────────────────────────────────────────────────── */
+.lang-btn.active {
+  border-color: var(--navy);
+  color: var(--navy);
+  background: rgba(99,102,241,0.09);
+}
+[data-theme="dark"] .lang-btn.active { border-color: var(--accent-yellow); color: var(--accent-yellow); background: rgba(241,238,99,0.10); }
+
+/* ─── Profile ────────────────────────────────────────────────────── */
+.profile-role-tag { background: rgba(99,102,241,0.10); color: var(--navy); }
+[data-theme="dark"] .profile-role-tag { background: rgba(165,180,252,0.13); color: var(--sky); }
+.profile-avatar-lg { color: var(--navy); }
+
+/* ─── Rating avatar ──────────────────────────────────────────────── */
+.rating-avatar {
+  background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+  color: var(--accent-yellow);
+  box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+}
+
+/* ─── Toast colors ───────────────────────────────────────────────── */
+.toast-info i { color: var(--navy); }
+
+/* ─── Location dots ──────────────────────────────────────────────── */
+.loc-dot-pickup { background: var(--navy); }
+.loc-gps { background: var(--mist); color: var(--navy); }
+.loc-gps:hover { background: var(--navy); color: white; }
+.suggestion-item i { color: var(--navy); }
+
+/* ─── Leaflet popup ──────────────────────────────────────────────── */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--bg-card) !important;
+  color: var(--text-1) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* ─── AI assistant button — keep purple, just re-tune shadows ──── */
+.btn-ai-assistant {
+  background: linear-gradient(135deg, var(--navy-dark), #a978f5);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.50);
+}
+@keyframes ai-pulse {
+  0%, 100% { box-shadow: 0 6px 20px rgba(99, 102, 241, 0.50); }
+  50%       { box-shadow: 0 6px 28px rgba(99, 102, 241, 0.80); }
+}
+.ai-powered-by { color: var(--navy); background: rgba(99,102,241,0.10); }
+[data-theme="dark"] .ai-powered-by { color: var(--sky); background: rgba(165,180,252,0.13); }
+.ai-suggestion-chip:hover { background: rgba(99,102,241,0.09); border-color: var(--navy); color: var(--navy); }
+.ai-msg-user .ai-msg-icon { background: var(--mist); color: var(--navy); }
+.ai-msg-user .ai-msg-bubble { background: var(--navy); color: white; }
+.ai-msg-bot .ai-msg-bubble { background: var(--mist); color: var(--text-1); }
+.ai-route-header { color: var(--navy); }
+.ai-route-meta i { color: var(--navy); }
+.ai-split-header { color: var(--navy); }
+.ai-split-fare { color: var(--navy); }
+[data-theme="dark"] .ai-split-fare { color: var(--sky-light); }
+.ai-input:focus { border-color: var(--accent-yellow); }
+.btn-ai-send { background: linear-gradient(135deg, var(--navy-dark), var(--navy-light)); }
+
+/* ─── Dark mode map tint — indigo hue ───────────────────────────── */
+[data-theme="dark"] .leaflet-tile-pane {
+  filter: brightness(0.94) saturate(0.80) hue-rotate(210deg) contrast(0.96);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   OBJECTIVE 2 — INVISIBLE SCROLLBAR (scrolling fully preserved)
+   Applies to body + every overflow-y container in the app.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Firefox */
+html,
+body,
+.side-panel,
+.modal-sheet,
+.ai-messages,
+.drivers-list,
+.sos-contacts-list,
+.shared-rides-list {
+  scrollbar-width: none;
+}
+
+/* Chrome / Safari / Edge WebKit */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.side-panel::-webkit-scrollbar,
+.modal-sheet::-webkit-scrollbar,
+.ai-messages::-webkit-scrollbar,
+.drivers-list::-webkit-scrollbar,
+.sos-contacts-list::-webkit-scrollbar,
+.shared-rides-list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Ensure scrollability is NOT disabled — only the bar is hidden */
+html {
+  overflow: hidden; /* keeps existing app-style layout */
+}
+body {
+  overflow: hidden; /* keeps existing layout */
+  -webkit-overflow-scrolling: touch; /* smooth momentum on iOS */
+}
+.side-panel,
+.modal-sheet,
+.ai-messages {
+  overflow-y: auto;           /* keep scroll alive */
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   OBJECTIVE 3 — SMOOTH & ABUNDANT ANIMATIONS
+   All animations use ONLY transform & opacity for GPU compositing.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 3A: Keyframe Library ─────────────────────────────────────────── */
+
+@keyframes tg-fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes tg-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes tg-scale-in {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes tg-slide-right {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+@keyframes tg-float {
+  0%, 100% { transform: translateY(0px);  }
+  50%       { transform: translateY(-5px); }
+}
+
+@keyframes tg-icon-bounce {
+  0%, 100% { transform: translateY(0) scale(1);     }
+  40%       { transform: translateY(-4px) scale(1.1); }
+  60%       { transform: translateY(-2px) scale(1.05); }
+}
+
+@keyframes tg-pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(99,102,241,0.40); }
+  70%  { box-shadow: 0 0 0 10px rgba(99,102,241,0);  }
+  100% { box-shadow: 0 0 0 0 rgba(99,102,241,0);    }
+}
+
+@keyframes tg-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes tg-spin-once {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes tg-stagger-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 3B: Load Animations — page entry ────────────────────────────── */
+
+/* Top nav glides down on load */
+.top-nav {
+  animation: tg-fade-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Auth card already has auth-slide-up — enhance with a longer spring */
+.auth-card {
+  animation: tg-fade-up 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.auth-brand  { animation: tg-fade-in 0.4s ease 0.2s both; }
+.auth-form.active .field-group {
+  animation: tg-stagger-fade 0.35s ease both;
+}
+.auth-form.active .field-group:nth-child(1) { animation-delay: 0.05s; }
+.auth-form.active .field-group:nth-child(2) { animation-delay: 0.10s; }
+.auth-form.active .field-group:nth-child(3) { animation-delay: 0.15s; }
+.auth-form.active .field-group:nth-child(4) { animation-delay: 0.20s; }
+.auth-form.active .field-group:nth-child(5) { animation-delay: 0.25s; }
+
+/* Panel cards stagger on reveal */
+.panel-card {
+  animation: tg-fade-up 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.side-panel .panel-card:nth-child(1) { animation-delay: 0.05s; }
+.side-panel .panel-card:nth-child(2) { animation-delay: 0.12s; }
+.side-panel .panel-card:nth-child(3) { animation-delay: 0.19s; }
+.side-panel .panel-card:nth-child(4) { animation-delay: 0.26s; }
+
+/* Driver cards stagger in */
+.driver-card {
+  animation: tg-slide-right 0.35s ease both;
+}
+.drivers-list .driver-card:nth-child(1) { animation-delay: 0.04s; }
+.drivers-list .driver-card:nth-child(2) { animation-delay: 0.09s; }
+.drivers-list .driver-card:nth-child(3) { animation-delay: 0.14s; }
+.drivers-list .driver-card:nth-child(4) { animation-delay: 0.19s; }
+.drivers-list .driver-card:nth-child(5) { animation-delay: 0.24s; }
+
+/* Active ride card already has slide-up; enrich it */
+.active-ride-card {
+  animation: tg-fade-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Ride-type buttons fan in */
+.ride-type-btn {
+  animation: tg-scale-in 0.3s ease both;
+}
+.ride-types .ride-type-btn:nth-child(1) { animation-delay: 0.04s; }
+.ride-types .ride-type-btn:nth-child(2) { animation-delay: 0.09s; }
+.ride-types .ride-type-btn:nth-child(3) { animation-delay: 0.14s; }
+.ride-types .ride-type-btn:nth-child(4) { animation-delay: 0.19s; }
+
+/* Toast enter already exists; add scale spring */
+.toast {
+  animation: tg-fade-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Modal sheet (already sheet-up) — enhance */
+.modal-sheet {
+  animation: tg-fade-up 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Fare estimate pops in */
+.fare-estimate {
+  animation: tg-scale-in 0.35s ease 0.1s both;
+}
+
+/* Stats bar items */
+.stat-item {
+  animation: tg-fade-up 0.4s ease both;
+}
+.stats-bar .stat-item:nth-child(1) { animation-delay: 0.05s; }
+.stats-bar .stat-item:nth-child(2) { animation-delay: 0.12s; }
+.stats-bar .stat-item:nth-child(3) { animation-delay: 0.19s; }
+
+/* ── 3C: Hover Effects — interactive elements ─────────────────────── */
+
+/* All buttons: smooth lift + scale */
+.btn-primary,
+.btn-accept-ride,
+.btn-sos-confirm,
+.btn-request {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 240ms ease,
+              background 200ms ease,
+              opacity 200ms ease;
+  will-change: transform;
+}
+.btn-primary:hover       { transform: translateY(-3px) scale(1.02); }
+.btn-accept-ride:hover   { transform: translateY(-2px) scale(1.03); }
+.btn-sos-confirm:hover   { transform: translateY(-3px) scale(1.02); }
+.btn-request:hover       { transform: translateY(-2px) scale(1.02); }
+
+/* Nav icon buttons */
+.btn-icon {
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 200ms ease,
+              color 200ms ease,
+              box-shadow 200ms ease;
+  will-change: transform;
+}
+.btn-icon:hover { transform: rotate(15deg) scale(1.12); }
+
+/* Ride-type cards */
+.ride-type-btn {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 200ms ease,
+              border-color 200ms ease,
+              box-shadow 200ms ease;
+  will-change: transform;
+}
+.ride-type-btn:hover:not(.active) {
+  transform: translateY(-3px) scale(1.06);
+  background: var(--mist);
+  border-color: var(--navy);
+  box-shadow: var(--shadow-sm);
+}
+.ride-type-btn.active {
+  transform: translateY(-2px);
+}
+
+/* Driver cards */
+.driver-card {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 200ms ease,
+              box-shadow 200ms ease;
+  will-change: transform;
+}
+.driver-card:hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: var(--shadow-md);
+}
+
+/* Map control buttons */
+.map-ctrl-btn {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 200ms ease,
+              box-shadow 200ms ease;
+  will-change: transform;
+}
+.map-ctrl-btn:hover { transform: translateY(-2px) scale(1.08); }
+
+/* Lang buttons */
+.lang-btn {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 200ms ease,
+              background 200ms ease;
+  will-change: transform;
+}
+.lang-btn:hover:not(.active) { transform: scale(1.10); }
+.lang-btn.active { transform: scale(1.05); }
+
+/* Role tabs */
+.role-tab {
+  transition: transform 230ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 200ms ease,
+              color 200ms ease;
+}
+.role-tab:hover:not(.active) { transform: scale(1.04); }
+
+/* Auth mode tabs */
+.auth-mode-tab {
+  transition: color 200ms ease,
+              border-bottom-color 200ms ease,
+              transform 200ms ease;
+}
+.auth-mode-tab:hover:not(.active) { transform: translateY(-1px); }
+
+/* Settings rows */
+.settings-row {
+  transition: transform 220ms ease;
+  border-radius: var(--r-sm);
+  padding: 4px 6px;
+}
+.settings-row:hover { transform: translateX(4px); }
+html[dir="rtl"] .settings-row:hover { transform: translateX(-4px); }
+
+/* SOS button — already pulsing, add hover pop */
+.btn-sos {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease;
+}
+.btn-sos:hover { transform: scale(1.10) translateY(-1px); }
+
+/* Star rating interactive */
+.star-btn {
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              color 200ms ease,
+              filter 200ms ease;
+}
+.star-btn:hover { transform: scale(1.30) rotate(-5deg); }
+
+/* Close button */
+.btn-modal-close {
+  transition: transform 230ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 200ms ease,
+              color 200ms ease;
+}
+.btn-modal-close:hover { transform: rotate(90deg) scale(1.1); }
+
+/* Cancel ride */
+.btn-cancel-ride {
+  transition: transform 230ms ease, background 200ms ease, color 200ms ease;
+}
+.btn-cancel-ride:hover { transform: scale(1.15); }
+
+/* AI suggestion chips */
+.ai-suggestion-chip {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 200ms ease,
+              border-color 200ms ease;
+}
+.ai-suggestion-chip:hover { transform: translateY(-2px) scale(1.04); }
+
+/* Add contact button */
+.btn-add-contact {
+  transition: transform 230ms ease, border-color 200ms ease, color 200ms ease;
+}
+.btn-add-contact:hover { transform: scale(1.02); }
+
+/* Logout */
+.btn-logout {
+  transition: transform 230ms ease, background 200ms ease;
+}
+.btn-logout:hover { transform: translateX(4px); }
+html[dir="rtl"] .btn-logout:hover { transform: translateX(-4px); }
+
+/* Ride request items */
+.ride-request-item {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 200ms ease,
+              box-shadow 200ms ease;
+}
+.ride-request-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--navy);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Reject ride */
+.btn-reject-ride {
+  transition: transform 220ms ease, background 200ms ease;
+}
+.btn-reject-ride:hover { transform: scale(1.04); }
+
+/* Accept ride → pulse ring on hover */
+.btn-accept-ride { animation: none; }
+.btn-accept-ride:hover { animation: tg-pulse-ring 0.8s ease; }
+
+/* ── 3D: Persistent Movement Animations ──────────────────────────── */
+
+/* Nav taxi icon — gentle float */
+.nav-taxi-icon {
+  animation: tg-float 4s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Preloader logo — already has preloader-float; keep it */
+
+/* Heatmap icon — subtle bounce */
+.heatmap-icon {
+  animation: tg-icon-bounce 3s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* SOS pulse ring — kept from existing styles */
+
+/* AI assistant button — pulse already defined; bump intensity */
+.btn-ai-assistant {
+  animation: ai-pulse 2.5s ease infinite;
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease;
+}
+.btn-ai-assistant:hover {
+  transform: scale(1.12) translateY(-3px);
+  animation-play-state: paused; /* freeze pulse on hover for crisp feel */
+}
+
+/* Primary CTA button — subtle shimmer on idle */
+.btn-primary {
+  background-size: 200% auto;
+  background-image: linear-gradient(
+    115deg,
+    var(--accent-yellow) 0%,
+    var(--accent-yellow-light) 40%,
+    var(--accent-yellow) 60%,
+    var(--accent-yellow) 100%
+  );
+  animation: tg-shimmer 3.5s linear infinite;
+}
+.btn-primary:hover { animation-play-state: paused; }
+
+/* Ride-type active indicator — gentle pulse ring */
+.ride-type-btn.active {
+  animation: tg-pulse-ring 2.5s ease infinite;
+}
+
+/* Driver avatar — float softly */
+.driver-avatar {
+  animation: tg-float 5s ease-in-out infinite;
+}
+
+/* Rating avatar */
+.rating-avatar {
+  animation: tg-float 4.5s ease-in-out infinite;
+}
+
+/* Ride status icon spins once on appear */
+.ride-status-icon {
+  animation: tg-spin-once 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Progress fill eases in */
+.ride-progress-fill {
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 3E: Transition Polish on Remaining Elements ──────────────────── */
+
+/* Cards */
+.panel-card {
+  transition: background var(--t-std),
+              border-color var(--t-std),
+              box-shadow 300ms ease,
+              transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+.panel-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Modal overlay fades in (already overlay-in; enhance) */
+.modal-overlay {
+  animation: tg-fade-in 0.2s ease both;
+}
+
+/* Field wrap focus ring */
+.field-wrap {
+  transition: border-color 200ms ease,
+              background 200ms ease,
+              transform 200ms ease,
+              box-shadow 200ms ease;
+}
+.field-wrap:focus-within {
+  transform: scale(1.01);
+  box-shadow: 0 0 0 3px rgba(241, 238, 99, 0.25);
+}
+
+/* Input/textarea focus shimmer */
+.ai-input {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+.ai-input:focus {
+  box-shadow: 0 0 0 3px rgba(241, 238, 99, 0.20);
+}
+
+/* Suggestion item slides right on hover */
+.suggestion-item {
+  transition: background 180ms ease, transform 200ms ease;
+}
+.suggestion-item:hover { transform: translateX(4px); }
+html[dir="rtl"] .suggestion-item:hover { transform: translateX(-4px); }
+
+/* Remove contact */
+.btn-remove-contact {
+  transition: transform 220ms ease, background 200ms ease, color 200ms ease;
+}
+.btn-remove-contact:hover { transform: scale(1.15) rotate(8deg); }
+
+/* SOS confirm pulse */
+.btn-sos-confirm {
+  animation: tg-pulse-ring 2.5s ease infinite;
+}
+.btn-sos-confirm:hover { animation-play-state: paused; }
+
+/* Preloader fill bar — already animated; no change needed */
+
+/* ── 3F: Respect reduce-motion preference ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
