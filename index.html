@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>TaxiFinder طنجة | وصلك بأمان</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Preloader -->
+<div id="preloader">
+    <div class="preloader-inner">
+        <div class="preloader-car">
+            <svg width="90" height="56" viewBox="0 0 90 56" fill="none">
+                <rect x="12" y="20" width="66" height="24" rx="7" fill="var(--accent)"/>
+                <rect x="24" y="10" width="38" height="18" rx="5" fill="var(--accent-light)"/>
+                <circle cx="25" cy="47" r="8" fill="var(--bg-secondary)" stroke="var(--accent)" stroke-width="2.5"/>
+                <circle cx="65" cy="47" r="8" fill="var(--bg-secondary)" stroke="var(--accent)" stroke-width="2.5"/>
+                <rect x="0" y="28" width="10" height="7" rx="2" fill="#FFD700"/>
+                <rect x="80" y="28" width="10" height="7" rx="2" fill="#FF6B6B"/>
+                <rect x="28" y="12" width="6" height="12" rx="1" fill="rgba(255,255,255,0.5)"/>
+                <rect x="38" y="12" width="10" height="12" rx="1" fill="rgba(255,255,255,0.5)"/>
+                <rect x="52" y="12" width="8" height="12" rx="1" fill="rgba(255,255,255,0.5)"/>
+            </svg>
+        </div>
+        <div class="preloader-brand">
+            <span class="preloader-taxi">Taxi</span><span class="preloader-finder">Finder</span>
+        </div>
+        <div class="preloader-city">طنجة — Tanger</div>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+        <span class="loader-hint">جاري التحميل...</span>
+    </div>
+</div>
+
+<!-- Background -->
+<div id="bg-grid"></div>
+
+<!-- ═══════════════ LOGIN MODAL ═══════════════ -->
+<div id="login-modal" class="modal active">
+    <div class="modal-overlay"></div>
+    <div class="modal-content login-modal">
+        <div class="modal-header">
+            <div class="modal-logo">
+                <div class="modal-logo-icon">🚖</div>
+                <div>
+                    <div class="modal-logo-text">Taxi<span>Finder</span></div>
+                    <div class="modal-logo-city">طنجة — Tanger</div>
+                </div>
+            </div>
+            <p class="modal-subtitle">أسرع وأوثق خدمة سيارات أجرة في طنجة</p>
+            <div class="modal-badges">
+                <span class="badge-pill">⚡ فوري</span>
+                <span class="badge-pill">🔒 آمن</span>
+                <span class="badge-pill verified-pill">✓ سائقون موثقون</span>
+            </div>
+        </div>
+
+        <div class="role-selector">
+            <button class="role-btn active" data-role="rider">
+                <span class="role-icon">👤</span>
+                <span class="role-label">راكب</span>
+                <span class="role-desc">احجز رحلتك</span>
+            </button>
+            <button class="role-btn" data-role="driver">
+                <span class="role-icon">🚗</span>
+                <span class="role-label">سائق</span>
+                <span class="role-desc">ابدأ الكسب</span>
+            </button>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="name">الاسم الكامل</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="name" placeholder="مثال: محمد الطنجاوي" required minlength="2">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="phone">رقم الهاتف</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📱</span>
+                    <input type="tel" id="phone" placeholder="+212 6XX-XXXXXX" required>
+                </div>
+            </div>
+
+            <div id="driver-fields" class="hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="car-model">نوع السيارة</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🚗</span>
+                            <input type="text" id="car-model" placeholder="تويوتا كورولا 2023">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="plate">رقم اللوحة</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🔢</span>
+                            <input type="text" id="plate" placeholder="1234 أ">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Card Field — NEW -->
+                <div class="form-group">
+                    <label for="registration-card">
+                        🪪 بطاقة تسجيل السيارة
+                        <span class="label-badge-required">مطلوب للتوثيق</span>
+                    </label>
+                    <div class="input-wrapper reg-card-input">
+                        <span class="input-icon">📋</span>
+                        <input type="text" id="registration-card"
+                               placeholder="مثال: RC-2024-TNG-00123"
+                               pattern="[A-Za-z0-9\-]+"
+                               title="أرقام وحروف لاتينية وشرطات فقط">
+                        <span class="input-hint-icon" title="رقم بطاقة التسجيل الرسمية للمركبة">ℹ️</span>
+                    </div>
+                    <p class="form-hint">رقم بطاقة التسجيل الرسمية للمركبة — يُستخدم للتحقق من هويتك كسائق موثق</p>
+                </div>
+
+                <div class="form-group">
+                    <label>فئة السيارة</label>
+                    <div class="car-type-selector">
+                        <label class="car-type-opt active">
+                            <input type="radio" name="car-type-reg" value="economy" checked>
+                            <span class="car-type-icon">🚕</span>
+                            <span>اقتصادي</span>
+                        </label>
+                        <label class="car-type-opt">
+                            <input type="radio" name="car-type-reg" value="comfort">
+                            <span class="car-type-icon">🚙</span>
+                            <span>مريح</span>
+                        </label>
+                        <label class="car-type-opt">
+                            <input type="radio" name="car-type-reg" value="vip">
+                            <span class="car-type-icon">🏎️</span>
+                            <span>VIP</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-full" id="btn-login">
+                <span id="btn-login-text">ابدأ الآن</span>
+                <span class="btn-arrow">←</span>
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <span>🔒 بياناتك محمية ومشفرة</span>
+            <span class="sep">•</span>
+            <span>✓ سائقون موثقون فقط</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ CONFIRM MODAL ═══════════════ -->
+<div id="confirm-modal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content confirm-modal-content">
+        <div class="confirm-header">
+            <div class="confirm-icon-wrap">🚖</div>
+            <h3>تأكيد الرحلة</h3>
+        </div>
+        <div class="confirm-route" id="confirm-route">
+            <div class="route-point pickup">
+                <div class="route-dot green"></div>
+                <span id="confirm-pickup">موقعك الحالي</span>
+            </div>
+            <div class="route-line"></div>
+            <div class="route-point dropoff">
+                <div class="route-dot red"></div>
+                <span id="confirm-dropoff">الوجهة</span>
+            </div>
+        </div>
+        <div class="confirm-details" id="confirm-details"></div>
+        <div class="confirm-price-wrap">
+            <span class="price-label">السعر التقديري</span>
+            <div class="price-badge" id="confirm-price">-- درهم</div>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn-confirm" id="btn-confirm">✓ تأكيد الرحلة</button>
+            <button class="btn-cancel" id="btn-cancel-modal">✕ إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ RATING MODAL ═══════════════ -->
+<div id="rating-modal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content rating-modal-content">
+        <div class="rating-driver-info" id="rating-driver-info">
+            <div class="rating-driver-avatar">🧑‍✈️</div>
+            <div>
+                <h4 id="rating-driver-name">اسم السائق</h4>
+                <p>كيف كانت رحلتك؟</p>
+            </div>
+        </div>
+        <div class="stars-container">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+        </div>
+        <div class="quick-tags" id="quick-tags">
+            <span class="qtag" data-tag="قيادة ممتازة">👍 قيادة ممتازة</span>
+            <span class="qtag" data-tag="سيارة نظيفة">✨ سيارة نظيفة</span>
+            <span class="qtag" data-tag="وصل في الوقت">⏰ وصل في الوقت</span>
+            <span class="qtag" data-tag="لطيف وودود">😊 لطيف وودود</span>
+        </div>
+        <textarea id="rating-comment" placeholder="أضف تعليقاً (اختياري)..." rows="3"></textarea>
+        <button class="btn-primary btn-full" id="btn-submit-rating">إرسال التقييم</button>
+    </div>
+</div>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header class="header" id="main-header">
+    <div class="container">
+        <div class="logo">
+            <div class="logo-icon-wrap">🚖</div>
+            <div>
+                <span class="logo-text">Taxi<em>Finder</em></span>
+                <span class="logo-city">طنجة</span>
+            </div>
+        </div>
+        <nav class="nav">
+            <div class="connection-status" id="conn-status">
+                <div class="conn-dot"></div>
+                <span>متصل</span>
+            </div>
+            <div class="weather-widget" id="weather-widget" title="طقس طنجة">
+                <span id="weather-icon">☀️</span>
+                <span id="weather-temp">--°</span>
+                <span class="weather-city">طنجة</span>
+            </div>
+            <div class="user-badge" id="user-badge">
+                <div class="user-avatar" id="user-avatar">👤</div>
+                <div class="user-info">
+                    <span id="user-name-display">مستخدم</span>
+                    <span class="user-role-badge" id="role-badge">راكب</span>
+                </div>
+            </div>
+            <!-- Dark Mode Toggle — NEW -->
+            <button class="btn-theme-toggle" id="btn-dark-mode" title="تبديل الوضع الليلي" aria-label="تبديل الوضع الليلي">
+                <span class="theme-icon-sun">☀️</span>
+                <span class="theme-icon-moon">🌙</span>
+                <span class="toggle-track">
+                    <span class="toggle-thumb"></span>
+                </span>
+            </button>
+            <button class="btn-logout" id="btn-logout" title="تسجيل الخروج">⏻</button>
+        </nav>
+    </div>
+</header>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<main class="main" id="main-app" style="display:none">
+
+    <!-- ══ RIDER SECTION ══ -->
+    <section class="rider-section active" id="rider-section">
+        <div class="container">
+
+            <!-- Live Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-icon">🚖</span>
+                    <div>
+                        <span class="stat-value" id="stat-drivers">0</span>
+                        <span class="stat-label">سائق موثق</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">⏱️</span>
+                    <div>
+                        <span class="stat-value" id="stat-avg-time">--</span>
+                        <span class="stat-label">دقائق انتظار</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🗺️</span>
+                    <div>
+                        <span class="stat-value" id="stat-trips">0</span>
+                        <span class="stat-label">رحلاتي</span>
+                    </div>
+                </div>
+                <div class="stat-item city-stat verified-stat">
+                    <span class="stat-icon">✓</span>
+                    <div>
+                        <span class="stat-value verified-count" id="stat-verified">100%</span>
+                        <span class="stat-label">سائقون موثقون</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-layout">
+                <!-- Left Column -->
+                <div class="app-left">
+
+                    <!-- Map -->
+                    <div class="map-card">
+                        <div class="map-header">
+                            <h3>🗺️ خريطة طنجة</h3>
+                            <button class="btn-locate" id="btn-get-location">
+                                <span>🎯</span> موقعي
+                            </button>
+                        </div>
+                        <div id="rider-map" class="map-container"></div>
+                        <div class="map-location-bar" id="location-display">
+                            <div class="location-pulse"></div>
+                            <span id="current-location-text">انقر على "موقعي" لتحديد موقعك</span>
+                        </div>
+                    </div>
+
+                    <!-- Booking Form -->
+                    <div class="card booking-card">
+                        <div class="card-header">
+                            <h3>🚀 احجز رحلتك</h3>
+                            <div class="price-estimate-badge" id="price-estimate-badge" style="display:none">
+                                <span id="price-estimate-text">-- درهم</span>
+                            </div>
+                        </div>
+
+                        <div class="route-builder">
+                            <div class="route-input-wrap">
+                                <div class="route-dot green"></div>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">📍</span>
+                                    <input type="text" id="pickup-display" placeholder="موقعك الحالي" readonly>
+                                    <button class="input-btn" id="btn-get-location-2" title="تحديد الموقع">🎯</button>
+                                </div>
+                            </div>
+                            <div class="route-connector"></div>
+                            <div class="route-input-wrap">
+                                <div class="route-dot red"></div>
+                                <div class="input-wrapper" style="position:relative">
+                                    <span class="input-icon">🏁</span>
+                                    <input type="text" id="destination" placeholder="إلى أين تريد الذهاب؟" autocomplete="off">
+                                    <button class="input-btn clear-dest" id="btn-clear-dest" style="display:none">✕</button>
+                                </div>
+                                <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
+                            </div>
+                        </div>
+
+                        <div class="car-types-row">
+                            <div class="car-type-card active" data-type="economy">
+                                <span class="car-emoji">🚕</span>
+                                <span class="car-name">اقتصادي</span>
+                                <span class="car-price" id="price-economy">-- درهم</span>
+                                <span class="car-eta">~4 دق</span>
+                            </div>
+                            <div class="car-type-card" data-type="comfort">
+                                <span class="car-emoji">🚙</span>
+                                <span class="car-name">مريح</span>
+                                <span class="car-price" id="price-comfort">-- درهم</span>
+                                <span class="car-eta">~6 دق</span>
+                            </div>
+                            <div class="car-type-card" data-type="vip">
+                                <span class="car-emoji">🏎️</span>
+                                <span class="car-name">VIP</span>
+                                <span class="car-price" id="price-vip">-- درهم</span>
+                                <span class="car-eta">~10 دق</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-row">
+                            <label class="pay-opt active" id="pay-cash">
+                                <input type="radio" name="payment" value="cash" checked>
+                                <span>💵 نقداً</span>
+                            </label>
+                            <label class="pay-opt" id="pay-card">
+                                <input type="radio" name="payment" value="card">
+                                <span>💳 بطاقة</span>
+                            </label>
+                        </div>
+
+                        <button class="btn-primary btn-full btn-request" id="btn-request-ride" disabled>
+                            <span id="btn-req-text">اختر وجهتك أولاً</span>
+                            <span class="btn-arrow">←</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="app-right">
+
+                    <!-- Available Drivers — Verified Only -->
+                    <div class="card taxis-card">
+                        <div class="card-header">
+                            <div class="card-header-left">
+                                <h3>🚖 السائقون المتاحون</h3>
+                                <span class="verified-only-label">✓ موثقون فقط</span>
+                            </div>
+                            <button class="btn-refresh" id="btn-refresh-drivers" title="تحديث">
+                                <span>🔄</span>
+                            </button>
+                        </div>
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">الكل</button>
+                            <button class="filter-tab" data-filter="economy">🚕 اقتصادي</button>
+                            <button class="filter-tab" data-filter="comfort">🚙 مريح</button>
+                            <button class="filter-tab" data-filter="vip">🏎️ VIP</button>
+                        </div>
+                        <div class="taxis-grid" id="taxis-grid"></div>
+                        <div class="empty-state" id="taxis-empty" style="display:none">
+                            <div class="empty-icon">🔍</div>
+                            <p>لا يوجد سائقون موثقون متاحون في المنطقة</p>
+                            <button class="btn-secondary" onclick="app.refreshDrivers()">🔄 تحديث</button>
+                        </div>
+                    </div>
+
+                    <!-- Tangier Places -->
+                    <div class="card tangier-highlights">
+                        <div class="card-header">
+                            <h3>📍 أماكن شائعة في طنجة</h3>
+                        </div>
+                        <div class="places-grid">
+                            <button class="place-chip" data-lat="35.7890" data-lng="-5.8003" onclick="app.setDestinationPlace(this)">🏰 القصبة</button>
+                            <button class="place-chip" data-lat="35.7785" data-lng="-5.8029" onclick="app.setDestinationPlace(this)">🕌 سوق البالة</button>
+                            <button class="place-chip" data-lat="35.7264" data-lng="-5.8989" onclick="app.setDestinationPlace(this)">✈️ مطار ابن بطوطة</button>
+                            <button class="place-chip" data-lat="35.7830" data-lng="-5.8177" onclick="app.setDestinationPlace(this)">🛍️ مول باسيفيكو</button>
+                            <button class="place-chip" data-lat="35.7795" data-lng="-5.8005" onclick="app.setDestinationPlace(this)">🌊 شاطئ ملابطة</button>
+                            <button class="place-chip" data-lat="35.7810" data-lng="-5.7960" onclick="app.setDestinationPlace(this)">🎓 جامعة عبد المالك</button>
+                            <button class="place-chip" data-lat="35.7710" data-lng="-5.8130" onclick="app.setDestinationPlace(this)">🏥 مستشفى محمد الخامس</button>
+                            <button class="place-chip" data-lat="35.7853" data-lng="-5.8095" onclick="app.setDestinationPlace(this)">🚢 ميناء طنجة</button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Trips -->
+                    <div class="card recent-trips-card">
+                        <div class="card-header">
+                            <h3>🕐 رحلاتي الأخيرة</h3>
+                            <button class="btn-text" id="btn-load-history">عرض الكل</button>
+                        </div>
+                        <div id="recent-trips-list">
+                            <div class="trips-loading">
+                                <div class="skeleton-trip"></div>
+                                <div class="skeleton-trip"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Tracking Panel -->
+            <div class="tracking-panel" id="tracking-panel" style="display:none">
+                <div class="tracking-inner">
+                    <div class="tracking-driver">
+                        <div class="tracking-avatar">🧑‍✈️</div>
+                        <div class="tracking-driver-details">
+                            <div class="tracking-name-row">
+                                <h4 id="tracking-driver-name">اسم السائق</h4>
+                                <span class="verified-badge-inline">✓ موثق</span>
+                            </div>
+                            <div class="tracking-car" id="tracking-car">السيارة</div>
+                            <div class="tracking-rating">⭐ <span id="tracking-driver-rating">5.0</span></div>
+                            <!-- Registration Card in Tracking — NEW -->
+                            <div class="tracking-reg-card" id="tracking-reg-card" style="display:none">
+                                <span class="reg-icon">🪪</span>
+                                <span id="tracking-reg-card-number">--</span>
+                            </div>
+                        </div>
+                        <div class="tracking-plate" id="tracking-plate">-- --</div>
+                    </div>
+                    <div class="tracking-eta-box">
+                        <span class="eta-label">وصول خلال</span>
+                        <span class="eta-value" id="eta-value">5 دقائق</span>
+                        <div class="fare-display" id="fare-display">-- درهم</div>
+                    </div>
+                    <div class="tracking-actions">
+                        <button class="btn-icon-round" title="اتصال" onclick="app.callDriver()">📞</button>
+                        <button class="btn-icon-round" title="رسالة" onclick="app.messageDriver()">💬</button>
+                        <button class="btn-danger-sm" onclick="app.cancelRide()">إلغاء</button>
+                    </div>
+                </div>
+                <div class="tracking-progress">
+                    <div class="progress-step active" data-step="1">
+                        <div class="step-dot"></div>
+                        <span>السائق في الطريق</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="2">
+                        <div class="step-dot"></div>
+                        <span>وصل السائق</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="3">
+                        <div class="step-dot"></div>
+                        <span>الرحلة جارية</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="4">
+                        <div class="step-dot"></div>
+                        <span>وصلت! 🎉</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ DRIVER SECTION ══ -->
+    <section class="driver-section" id="driver-section">
+        <div class="container">
+            <div class="app-layout">
+                <div class="app-left">
+
+                    <!-- Driver Profile Card -->
+                    <div class="card driver-status-card">
+                        <div class="driver-profile-header">
+                            <div class="driver-avatar-lg">🧑‍✈️</div>
+                            <div class="driver-profile-info">
+                                <div class="driver-name-row">
+                                    <h3 id="driver-name-display">اسم السائق</h3>
+                                    <!-- Verified Badge — prominently shown -->
+                                    <span class="driver-verified-badge" id="driver-verified-badge">✓ موثق</span>
+                                </div>
+                                <p class="driver-car-text" id="driver-car-display">السيارة</p>
+                                <div class="driver-plate-badge" id="driver-plate-badge">-- --</div>
+
+                                <!-- Registration Card Display — NEW -->
+                                <div class="reg-card-display" id="reg-card-display" style="display:none">
+                                    <span class="reg-card-label">🪪 بطاقة التسجيل:</span>
+                                    <span class="reg-card-number" id="reg-card-number">--</span>
+                                    <span class="reg-card-status-badge">✓ مسجلة</span>
+                                </div>
+
+                                <div class="driver-rating-row">
+                                    <span>⭐ <strong id="driver-rating-display">5.0</strong></span>
+                                    <span class="dot-sep">•</span>
+                                    <span><strong id="driver-trips-count">0</strong> رحلة</span>
+                                </div>
+                            </div>
+                            <div class="driver-car-type-badge" id="driver-car-type-badge">اقتصادي</div>
+                        </div>
+
+                        <div class="online-toggle-wrapper">
+                            <div class="toggle-info">
+                                <span class="toggle-label">حالتك الآن</span>
+                                <span class="toggle-status-text" id="toggle-status-text">غير متصل</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="driver-online-toggle">
+                                <span class="toggle-slider">
+                                    <span class="toggle-text-on">متصل</span>
+                                    <span class="toggle-text-off">غير متصل</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="driver-stats-row">
+                            <div class="driver-stat">
+                                <span class="stat-num accent" id="d-trips-today">0</span>
+                                <span class="stat-lbl">رحلات اليوم</span>
+                            </div>
+                            <div class="driver-stat">
+                                <span class="stat-num green" id="d-earnings-today">0</span>
+                                <span class="stat-lbl">درهم اليوم</span>
+                            </div>
+                            <div class="driver-stat">
+                                <span class="stat-num" id="d-hours-online">0.0</span>
+                                <span class="stat-lbl">ساعات متصل</span>
+                            </div>
+                            <div class="driver-stat">
+                                <span class="stat-num" id="d-acceptance-rate">100%</span>
+                                <span class="stat-lbl">معدل القبول</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Map -->
+                    <div class="map-card">
+                        <div class="map-header">
+                            <h3>🗺️ موقعك على الخريطة</h3>
+                            <div class="map-live-badge">
+                                <div class="live-dot"></div>
+                                مباشر
+                            </div>
+                        </div>
+                        <div id="driver-map" class="map-container"></div>
+                    </div>
+                </div>
+
+                <div class="app-right">
+                    <!-- Incoming Requests -->
+                    <div class="card requests-card">
+                        <div class="card-header">
+                            <h3>📨 طلبات الرحلة</h3>
+                            <div class="requests-badge" id="requests-count-badge">0</div>
+                        </div>
+                        <div id="rides-list" class="rides-list">
+                            <div class="empty-state">
+                                <div class="empty-icon">⏳</div>
+                                <p>في انتظار طلبات الركاب...</p>
+                                <span class="empty-hint">يجب أن تكون متصلاً لاستقبال الطلبات</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Earnings -->
+                    <div class="card earnings-card">
+                        <div class="card-header">
+                            <h3>📊 أرباح الأسبوع</h3>
+                            <span class="earnings-period">آخر 7 أيام</span>
+                        </div>
+                        <div class="chart-labels" id="chart-labels"></div>
+                        <div class="earnings-chart" id="earnings-chart"></div>
+                        <div class="earnings-summary">
+                            <div class="earn-summary-item">
+                                <span class="earn-summary-label">الإجمالي</span>
+                                <span class="earn-summary-value accent" id="weekly-total">0 درهم</span>
+                            </div>
+                            <div class="earn-summary-item">
+                                <span class="earn-summary-label">المعدل اليومي</span>
+                                <span class="earn-summary-value" id="daily-avg">0 درهم</span>
+                            </div>
+                            <div class="earn-summary-item">
+                                <span class="earn-summary-label">أفضل يوم</span>
+                                <span class="earn-summary-value green" id="best-day">0 درهم</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Tips -->
+                    <div class="card tips-card">
+                        <div class="card-header"><h3>💡 نصائح للسائق</h3></div>
+                        <div class="tips-list">
+                            <div class="tip-item"><span class="tip-icon">🕐</span><span>أوقات الذروة: 7–9ص و5–8م</span></div>
+                            <div class="tip-item"><span class="tip-icon">📍</span><span>المناطق الأكثر طلباً: الميناء، مول باسيفيكو</span></div>
+                            <div class="tip-item"><span class="tip-icon">⭐</span><span>الحفاظ على تقييم 4.8+ يزيد الطلبات</span></div>
+                            <div class="tip-item"><span class="tip-icon">✓</span><span>تجديد بطاقة التسجيل يحافظ على توثيقك</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Toast Notifications -->
+<div id="toast-container"></div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script src="app.js" type="module"></script>
+</body>
+</html>

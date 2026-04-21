@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light" data-lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>TaxiGo — طنجة</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     PRELOADER
+═══════════════════════════════════════════════════════ -->
+<div id="preloader" class="preloader">
+    <div class="preloader-inner">
+        <div class="preloader-logo">
+            <i class="fa-solid fa-taxi"></i>
+        </div>
+        <div class="preloader-name">TaxiGo</div>
+        <div class="preloader-city" data-i18n="city_tangier">طنجة</div>
+        <div class="preloader-bar"><div class="preloader-fill"></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen hidden">
+    <div class="auth-bg">
+        <div class="auth-wave auth-wave-1"></div>
+        <div class="auth-wave auth-wave-2"></div>
+        <div class="auth-wave auth-wave-3"></div>
+    </div>
+
+    <div class="auth-card">
+        <!-- Brand -->
+        <div class="auth-brand">
+            <div class="auth-logo"><i class="fa-solid fa-taxi"></i></div>
+            <h1 class="auth-title">TaxiGo</h1>
+            <p class="auth-subtitle" data-i18n="auth_subtitle">طنجة • رحلتك بأمان</p>
+        </div>
+
+        <!-- Role Toggle -->
+        <div class="role-tabs">
+            <button class="role-tab active" data-role="rider">
+                <i class="fa-solid fa-user"></i>
+                <span data-i18n="role_rider">راكب</span>
+            </button>
+            <button class="role-tab" data-role="driver">
+                <i class="fa-solid fa-steering-wheel"></i>
+                <span data-i18n="role_driver">سائق</span>
+            </button>
+        </div>
+
+        <!-- Mode Toggle (Login / Register) -->
+        <div class="auth-mode-tabs">
+            <button class="auth-mode-tab active" data-mode="login" data-i18n="btn_login">تسجيل الدخول</button>
+            <button class="auth-mode-tab" data-mode="register" data-i18n="btn_register">حساب جديد</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form active">
+            <div class="field-group">
+                <label data-i18n="field_phone">رقم الهاتف</label>
+                <div class="field-wrap">
+                    <i class="fa-solid fa-phone field-icon"></i>
+                    <input type="tel" id="login-phone" placeholder="+212 6XX-XXXXXX" autocomplete="tel" required>
+                </div>
+            </div>
+            <div class="field-group">
+                <label data-i18n="field_password">كلمة المرور</label>
+                <div class="field-wrap">
+                    <i class="fa-solid fa-lock field-icon"></i>
+                    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required>
+                    <button type="button" class="field-toggle-pw" tabindex="-1">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="auth-error" class="auth-error hidden"></div>
+            <button type="submit" class="btn-primary btn-full">
+                <span data-i18n="btn_enter">دخول</span>
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" class="auth-form">
+            <div class="field-group">
+                <label data-i18n="field_fullname">الاسم الكامل</label>
+                <div class="field-wrap">
+                    <i class="fa-solid fa-user field-icon"></i>
+                    <input type="text" id="reg-name" placeholder="" autocomplete="name" required>
+                </div>
+            </div>
+            <div class="field-group">
+                <label data-i18n="field_phone">رقم الهاتف</label>
+                <div class="field-wrap">
+                    <i class="fa-solid fa-phone field-icon"></i>
+                    <input type="tel" id="reg-phone" placeholder="+212 6XX-XXXXXX" required>
+                </div>
+            </div>
+            <div class="field-group">
+                <label data-i18n="field_password">كلمة المرور</label>
+                <div class="field-wrap">
+                    <i class="fa-solid fa-lock field-icon"></i>
+                    <input type="password" id="reg-password" placeholder="8+ حروف وأرقام" autocomplete="new-password" required>
+                </div>
+            </div>
+
+            <!-- Driver-only fields -->
+            <div id="driver-reg-fields" class="driver-fields hidden">
+                <div class="fields-divider">
+                    <span data-i18n="vehicle_info">معلومات السيارة</span>
+                </div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <label data-i18n="field_make">الماركة</label>
+                        <div class="field-wrap">
+                            <i class="fa-solid fa-car field-icon"></i>
+                            <input type="text" id="reg-make" placeholder="Toyota">
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label data-i18n="field_model">الموديل</label>
+                        <div class="field-wrap">
+                            <i class="fa-solid fa-car-side field-icon"></i>
+                            <input type="text" id="reg-model" placeholder="Corolla">
+                        </div>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <label data-i18n="field_year">السنة</label>
+                        <div class="field-wrap">
+                            <i class="fa-solid fa-calendar field-icon"></i>
+                            <input type="number" id="reg-year" placeholder="2022" min="2000" max="2026">
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label data-i18n="field_plate">اللوحة</label>
+                        <div class="field-wrap">
+                            <i class="fa-solid fa-hashtag field-icon"></i>
+                            <input type="text" id="reg-plate" placeholder="12345-A-1">
+                        </div>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <label data-i18n="field_color">اللون</label>
+                        <div class="field-wrap">
+                            <i class="fa-solid fa-palette field-icon"></i>
+                            <input type="text" id="reg-color" placeholder="White">
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label data-i18n="field_capacity">المقاعد</label>
+                        <div class="field-wrap">
+                            <i class="fa-solid fa-users field-icon"></i>
+                            <select id="reg-capacity">
+                                <option value="4">4</option>
+                                <option value="6" selected>6 (Grand Taxi)</option>
+                                <option value="9">9 (Minibus)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label data-i18n="field_type">نوع الخدمة</label>
+                    <div class="field-wrap">
+                        <i class="fa-solid fa-tag field-icon"></i>
+                        <select id="reg-type">
+                            <option value="economy" data-i18n="type_economy">اقتصادي</option>
+                            <option value="comfort" data-i18n="type_comfort">مريح</option>
+                            <option value="grand_taxi" data-i18n="type_grand" selected>طاكسي كبير</option>
+                            <option value="vip" data-i18n="type_vip">VIP</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reg-error" class="auth-error hidden"></div>
+            <button type="submit" class="btn-primary btn-full">
+                <span data-i18n="btn_create_account">إنشاء الحساب</span>
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════════════════ -->
+<div id="app-screen" class="app-screen hidden">
+
+    <!-- ── MAP (full-screen background layer) ─────────────── -->
+    <div id="map" class="map-layer"></div>
+
+    <!-- ── TOP NAV ─────────────────────────────────────────── -->
+    <header class="top-nav glass">
+        <div class="nav-brand">
+            <i class="fa-solid fa-taxi nav-taxi-icon"></i>
+            <span class="nav-title">TaxiGo</span>
+            <span class="nav-city" data-i18n="city_tangier">طنجة</span>
+        </div>
+
+        <div class="nav-user">
+            <div class="nav-role-badge" id="role-badge">
+                <i class="fa-solid fa-user"></i>
+                <span id="role-label" data-i18n="role_rider">راكب</span>
+            </div>
+            <div class="nav-username" id="nav-username">—</div>
+        </div>
+''
+        <div class="nav-actions">
+            <button class="btn-icon" id="btn-mobile-menu" onclick="app._toggleMobilePanel()" style="display:none" title="Menu">
+               <i class="fa-solid fa-bars"></i>
+            </button>
+            <!-- SOS Button -->
+            <button class="btn-sos" id="btn-sos" title="SOS">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>SOS</span>
+            </button>
+            <!-- Settings -->
+            <button class="btn-icon" id="btn-settings" title="الإعدادات">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ── MAP CONTROLS ─────────────────────────────────────── -->
+    <div class="map-controls">
+        <button class="map-ctrl-btn" id="btn-locate" title="موقعي">
+            <i class="fa-solid fa-location-crosshairs"></i>
+        </button>
+        <button class="map-ctrl-btn" id="btn-zoom-in">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <button class="map-ctrl-btn" id="btn-zoom-out">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+    </div>
+
+    <!-- Phase 4: Floating AI Assistant button (visible after login) -->
+    <button class="btn-ai-assistant hidden" id="btn-ai-assistant" title="AI Assistant">
+        <i class="fa-solid fa-robot"></i>
+    </button>
+
+    <!-- ═══════════════════════════════════════════
+         RIDER PANEL
+    ═══════════════════════════════════════════ -->
+    <div id="rider-panel" class="side-panel hidden">
+
+        <!-- Search card -->
+        <div class="panel-card" id="booking-card">
+            <div class="card-header">
+                <h2 data-i18n="heading_whereto">إلى أين؟</h2>
+                <div class="live-time" id="live-time">—</div>
+            </div>
+
+            <!-- Location inputs -->
+            <div class="location-inputs">
+                <div class="loc-row">
+                    <div class="loc-dot loc-dot-pickup"></div>
+                    <input type="text" id="pickup-input" class="loc-input"
+                           data-i18n-placeholder="placeholder_pickup" placeholder="نقطة الانطلاق">
+                    <button class="loc-gps" id="btn-use-gps" title="موقعي الحالي">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </button>
+                </div>
+                <div class="loc-divider"></div>
+                <div class="loc-row">
+                    <div class="loc-dot loc-dot-dropoff"></div>
+                    <input type="text" id="dropoff-input" class="loc-input"
+                           data-i18n-placeholder="placeholder_dropoff" placeholder="الوجهة">
+                </div>
+            </div>
+
+            <!-- Phase 4: AI route suggestion card (hidden until triggered) -->
+            <div class="ai-route-card hidden" id="ai-route-card">
+                <div class="ai-route-header">
+                    <i class="fa-solid fa-robot"></i>
+                    <span id="ai-route-label">AI Route</span>
+                </div>
+                <div class="ai-route-body" id="ai-route-body">—</div>
+                <div class="ai-route-meta">
+                    <span><i class="fa-solid fa-road"></i> <span id="ai-route-dist">—</span></span>
+                    <span><i class="fa-solid fa-clock"></i> <span id="ai-route-eta">—</span></span>
+                    <span><i class="fa-solid fa-traffic-light"></i> <span id="ai-route-traffic">—</span></span>
+                </div>
+            </div>
+
+            <!-- Suggestions -->
+            <div class="suggestions" id="suggestions"></div>
+
+            <!-- Ride type selector -->
+            <div class="ride-types" id="ride-type-selector">
+                <button class="ride-type-btn active" data-type="economy">
+                    <i class="fa-solid fa-car"></i>
+                    <span data-i18n="type_economy">اقتصادي</span>
+                    <small>4 MAD/km</small>
+                </button>
+                <button class="ride-type-btn" data-type="comfort">
+                    <i class="fa-solid fa-car-side"></i>
+                    <span data-i18n="type_comfort">مريح</span>
+                    <small>6 MAD/km</small>
+                </button>
+                <button class="ride-type-btn" data-type="grand_taxi">
+                    <i class="fa-solid fa-van-shuttle"></i>
+                    <span data-i18n="type_grand">طاكسي كبير</span>
+                    <small>مشترك</small>
+                </button>
+                <button class="ride-type-btn" data-type="vip">
+                    <i class="fa-solid fa-star"></i>
+                    <span>VIP</span>
+                    <small>12 MAD/km</small>
+                </button>
+            </div>
+
+            <!-- Fare estimate -->
+            <div class="fare-estimate hidden" id="fare-estimate">
+                <div class="fare-row">
+                    <span data-i18n="est_fare">السعر التقديري</span>
+                    <strong id="fare-amount">— MAD</strong>
+                </div>
+                <div class="fare-row fare-small">
+                    <span id="fare-dist">— km</span>
+                    <span id="fare-eta">— دقيقة</span>
+                </div>
+            </div>
+
+            <!-- Payment method -->
+            <div class="payment-row">
+                <div class="payment-select">
+                    <i class="fa-solid fa-wallet"></i>
+                    <select id="payment-method">
+                        <option value="cash" data-i18n="pay_cash">نقدي</option>
+                        <option value="card" data-i18n="pay_card">بطاقة</option>
+                    </select>
+                </div>
+                <button class="btn-primary btn-request" id="btn-request-ride">
+                    <span data-i18n="btn_request">طلب سيارة</span>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Nearby drivers list -->
+        <div class="panel-card" id="drivers-nearby-card">
+            <div class="card-header-mini">
+                <i class="fa-solid fa-location-pin"></i>
+                <span data-i18n="heading_nearby">سائقون قريبون</span>
+                <span class="driver-count-badge" id="driver-count">0</span>
+            </div>
+            <div class="drivers-list" id="drivers-list">
+                <div class="no-drivers" data-i18n="no_drivers">
+                    لا يوجد سائقون متاحون الآن
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         DRIVER PANEL
+    ═══════════════════════════════════════════ -->
+    <div id="driver-panel" class="side-panel hidden">
+
+        <!-- Driver status card -->
+        <div class="panel-card driver-status-card">
+            <div class="driver-header">
+                <div class="driver-avatar">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div class="driver-meta">
+                    <h3 id="driver-name-display">—</h3>
+                    <div class="driver-vehicle" id="driver-vehicle-display">—</div>
+                </div>
+                <div class="driver-status-wrap">
+                    <label class="toggle-switch" for="online-toggle">
+                        <input type="checkbox" id="online-toggle">
+                        <span class="toggle-track">
+                            <span class="toggle-thumb"></span>
+                        </span>
+                    </label>
+                    <span class="toggle-label" id="online-label" data-i18n="status_offline">غير متاح</span>
+                </div>
+            </div>
+
+            <!-- Stats bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-val" id="stat-today">0</div>
+                    <div class="stat-lbl" data-i18n="stat_today">اليوم MAD</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val" id="stat-rides">0</div>
+                    <div class="stat-lbl" data-i18n="stat_rides">رحلات</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val" id="stat-rating">—</div>
+                    <div class="stat-lbl" data-i18n="stat_rating">تقييم</div>
+                </div>
+            </div>
+            <!-- Premium button injected by JS -->
+        </div>
+
+        <!-- Heatmap toggle -->
+        <div class="panel-card heatmap-card">
+            <div class="heatmap-header">
+                <div class="heatmap-info">
+                    <i class="fa-solid fa-fire heatmap-icon"></i>
+                    <div>
+                        <div class="heatmap-title" data-i18n="heatmap_title">خريطة الطلب</div>
+                        <div class="heatmap-sub" data-i18n="heatmap_sub">المناطق الأكثر نشاطاً</div>
+                    </div>
+                </div>
+                <label class="toggle-switch" for="heatmap-toggle">
+                    <input type="checkbox" id="heatmap-toggle" checked>
+                    <span class="toggle-track">
+                        <span class="toggle-thumb"></span>
+                    </span>
+                </label>
+            </div>
+            <div class="heatmap-legend">
+                <span class="legend-dot legend-low"></span><span data-i18n="legend_low">منخفض</span>
+                <span class="legend-dot legend-mid"></span><span data-i18n="legend_mid">متوسط</span>
+                <span class="legend-dot legend-high"></span><span data-i18n="legend_high">مرتفع</span>
+            </div>
+        </div>
+
+        <!-- Pending ride requests -->
+        <div class="panel-card ride-requests-card">
+            <div class="card-header-mini">
+                <i class="fa-solid fa-bell"></i>
+                <span data-i18n="heading_requests">طلبات الركوب</span>
+            </div>
+            <div id="ride-requests-list">
+                <div class="empty-state" data-i18n="no_requests">لا طلبات جديدة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ACTIVE RIDE CARD (rider & driver)
+    ═══════════════════════════════════════════ -->
+    <div id="active-ride-card" class="panel-card active-ride-card hidden">
+        <div class="ride-status-header">
+            <div class="ride-status-icon" id="ride-status-icon">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="ride-status-info">
+                <div class="ride-status-text" id="ride-status-text" data-i18n="status_searching">نبحث عن سائق…</div>
+                <div class="ride-status-sub" id="ride-status-sub">—</div>
+            </div>
+            <button class="btn-cancel-ride" id="btn-cancel-ride">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="ride-progress-bar"><div class="ride-progress-fill" id="ride-progress"></div></div>
+        <div class="ride-route-mini">
+            <div class="route-mini-from" id="route-mini-from">—</div>
+            <i class="fa-solid fa-arrow-left route-arrow"></i>
+            <div class="route-mini-to" id="route-mini-to">—</div>
+        </div>
+        <div class="ride-driver-info hidden" id="ride-driver-info">
+            <div class="ride-driver-avatar"><i class="fa-solid fa-user-tie"></i></div>
+            <div class="ride-driver-meta">
+                <div class="ride-driver-name" id="ride-driver-name">—</div>
+                <div class="ride-driver-car" id="ride-driver-car">—</div>
+            </div>
+            <div class="ride-driver-rating" id="ride-driver-rating">
+                <i class="fa-solid fa-star"></i> —
+            </div>
+        </div>
+        <div class="ride-fare-final hidden" id="ride-fare-final">
+            <span data-i18n="final_fare">الأجرة النهائية</span>
+            <strong id="final-fare-amount">— MAD</strong>
+        </div>
+        <!-- Phase 3: Chat widget injected here by JS -->
+        <!-- Phase 4: AI fare-split card injected here by JS for shared rides -->
+    </div>
+
+</div><!-- /app-screen -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-sheet" role="dialog" aria-label="الإعدادات">
+        <div class="modal-drag-handle"></div>
+        <div class="modal-header">
+            <h2 data-i18n="settings_title">الإعدادات</h2>
+            <button class="btn-modal-close" id="settings-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Dark Mode -->
+        <div class="settings-section">
+            <div class="settings-row">
+                <div class="settings-row-info">
+                    <i class="fa-solid fa-moon settings-icon"></i>
+                    <div>
+                        <div class="settings-label" data-i18n="setting_darkmode">الوضع الليلي</div>
+                        <div class="settings-sublabel" data-i18n="setting_darkmode_sub">خريطة عالية التباين</div>
+                    </div>
+                </div>
+                <label class="toggle-switch" for="dark-mode-toggle">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span class="toggle-track">
+                        <span class="toggle-thumb"></span>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Language -->
+        <div class="settings-section">
+            <div class="settings-section-title" data-i18n="setting_language">اللغة</div>
+            <div class="lang-grid" id="lang-grid">
+                <button class="lang-btn active" data-lang="ar">
+                    <span class="lang-flag">🇲🇦</span>
+                    <span>العربية</span>
+                </button>
+                <button class="lang-btn" data-lang="fr">
+                    <span class="lang-flag">🇫🇷</span>
+                    <span>Français</span>
+                </button>
+                <button class="lang-btn" data-lang="en">
+                    <span class="lang-flag">🇬🇧</span>
+                    <span>English</span>
+                </button>
+                <button class="lang-btn" data-lang="es">
+                    <span class="lang-flag">🇪🇸</span>
+                    <span>Español</span>
+                </button>
+                <button class="lang-btn" data-lang="de">
+                    <span class="lang-flag">🇩🇪</span>
+                    <span>Deutsch</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="settings-section">
+            <div class="settings-section-title" data-i18n="setting_profile">الملف الشخصي</div>
+            <div class="profile-preview" id="settings-profile-preview">
+                <div class="profile-avatar-lg">
+                    <i class="fa-solid fa-user-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <div class="profile-name-lg" id="settings-username">—</div>
+                    <div class="profile-phone-lg" id="settings-phone">—</div>
+                    <div class="profile-role-tag" id="settings-role">—</div>
+                </div>
+            </div>
+            <!-- SOS Contacts management -->
+            <div class="sos-contacts-section">
+                <div class="sos-contacts-header">
+                    <i class="fa-solid fa-phone-flip sos-icon-sm"></i>
+                    <span data-i18n="sos_contacts">جهات اتصال الطوارئ</span>
+                </div>
+                <div id="sos-contacts-list" class="sos-contacts-list">
+                    <!-- Rendered by JS -->
+                </div>
+                <button class="btn-add-contact" id="btn-add-sos">
+                    <i class="fa-solid fa-plus"></i>
+                    <span data-i18n="btn_add_contact">إضافة جهة اتصال</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Logout -->
+        <div class="settings-section">
+            <button class="btn-logout" id="btn-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span data-i18n="btn_logout">تسجيل الخروج</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SOS MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="sos-modal" class="modal-overlay hidden">
+    <div class="modal-sheet sos-modal-sheet" role="alertdialog">
+        <div class="sos-pulse-ring"></div>
+        <div class="sos-icon-wrap">
+            <i class="fa-solid fa-triangle-exclamation sos-big-icon"></i>
+        </div>
+        <h2 class="sos-title" data-i18n="sos_title">زر الطوارئ</h2>
+        <p class="sos-desc" data-i18n="sos_desc">
+            سيتم إرسال موقعك الحالي ومعلومات رحلتك لجهات الاتصال الطارئة فوراً
+        </p>
+
+        <div class="sos-location-info">
+            <i class="fa-solid fa-location-dot"></i>
+            <span id="sos-location-text" data-i18n="sos_locating">جاري تحديد الموقع…</span>
+        </div>
+
+        <div class="sos-contacts-display" id="sos-contacts-display">
+            <!-- Rendered by JS -->
+        </div>
+
+        <div class="sos-actions">
+            <button class="btn-sos-confirm" id="btn-sos-confirm">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span data-i18n="btn_sos_send">إرسال التنبيه</span>
+            </button>
+            <button class="btn-sos-cancel" id="btn-sos-cancel" data-i18n="btn_cancel">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     RATING MODAL  (rider → driver)
+═══════════════════════════════════════════════════════ -->
+<div id="rating-modal" class="modal-overlay hidden">
+    <div class="modal-sheet" role="dialog">
+        <div class="modal-header">
+            <h2 data-i18n="rating_title">كيف كانت رحلتك؟</h2>
+        </div>
+        <div class="rating-driver-info">
+            <div class="rating-avatar"><i class="fa-solid fa-user-tie"></i></div>
+            <div id="rating-driver-name" class="rating-driver-name">—</div>
+        </div>
+        <div class="star-rating" id="star-rating">
+            <button class="star-btn" data-val="1"><i class="fa-solid fa-star"></i></button>
+            <button class="star-btn" data-val="2"><i class="fa-solid fa-star"></i></button>
+            <button class="star-btn" data-val="3"><i class="fa-solid fa-star"></i></button>
+            <button class="star-btn" data-val="4"><i class="fa-solid fa-star"></i></button>
+            <button class="star-btn" data-val="5"><i class="fa-solid fa-star"></i></button>
+        </div>
+        <textarea id="rating-comment" class="rating-comment"
+                  data-i18n-placeholder="placeholder_comment"
+                  placeholder="تعليق اختياري…" rows="3"></textarea>
+        <button class="btn-primary btn-full" id="btn-submit-rating">
+            <span data-i18n="btn_submit_rating">إرسال التقييم</span>
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PHASE 4 — AI ASSISTANT MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="ai-modal" class="modal-overlay hidden">
+    <div class="modal-sheet ai-modal-sheet" role="dialog" aria-label="AI Assistant">
+        <div class="modal-drag-handle"></div>
+
+        <!-- Header -->
+        <div class="modal-header">
+            <div class="ai-header-brand">
+                <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                    <div class="ai-brand-name" id="ai-brand-name">TaxiGo AI</div>
+                    <div class="ai-brand-sub" id="ai-brand-sub">مساعدك الذكي</div>
+                </div>
+                <span class="ai-powered-by">Powered by Grok</span>
+            </div>
+            <button class="btn-modal-close" id="ai-modal-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Suggested prompts -->
+        <div class="ai-suggestions" id="ai-suggestions">
+            <!-- Injected by JS in current language -->
+        </div>
+
+        <!-- Conversation -->
+        <div class="ai-messages" id="ai-messages">
+            <!-- Messages injected by JS -->
+        </div>
+
+        <!-- Input -->
+        <div class="ai-input-row">
+            <textarea class="ai-input" id="ai-input" rows="1"
+                      placeholder="اسألني أي شيء…" maxlength="500"></textarea>
+            <button class="btn-ai-send" id="btn-ai-send">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TOAST NOTIFICATIONS
+═══════════════════════════════════════════════════════ -->
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════ -->
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet.heat (heatmap plugin) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+<!-- Socket.IO client -->
+<script src="/socket.io/socket.io.js"></script>
+<!-- App -->
+<script src="app.js"></script>
+</body>
+</html>
