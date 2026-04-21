@@ -1,21 +1,10 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/server.js"
-    },
-    {
-      "source": "/main.css",
-      "destination": "/main.css"
-    },
-    {
-      "source": "/app.js",
-      "destination": "/app.js"
-    },
-    {
-      "source": "/((?!main\\.css|app\\.js|api/).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/(.*)", "destination": "/server.js" },
+    { "source": "/main.css", "destination": "/main.css" },
+    { "source": "/app.js", "destination": "/app.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
