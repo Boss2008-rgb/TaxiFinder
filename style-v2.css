@@ -4,6 +4,30 @@
    ============================================================ */
 
 /* ══════════════ THEME VARIABLES ══════════════ */
+/* --- التعديلات المطلوبة للتشغيل على Vercel --- */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
+
+:root {
+    --accent: #FFD700;
+    --accent-dark: #ccac00;
+    --bg-primary: #ffffff;
+    --text-main: #1a1a1a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Tajawal', sans-serif;
+}
+
+body {
+    direction: rtl;
+    background-color: var(--bg-primary);
+}
+/* --- نهاية التعديلات الإضافية --- */
+
+/* اترك باقي الـ 1918 سطر كما هي تماماً تحت هذا السطر */
 :root {
     /* ── Accent – Tangier Taxi Blue ── */
     --accent:              #0EA5E9;

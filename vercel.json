@@ -3,7 +3,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/server.js" },
-    { "source": "/main.css", "destination": "/main.css" },
+    { "source": "/style-v2.css", "destination": "/style-v2.css" },
     { "source": "/app.js", "destination": "/app.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
