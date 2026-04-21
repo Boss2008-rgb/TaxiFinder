@@ -2,6 +2,8 @@
   "version": 2,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/server.js" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/main.css", "destination": "/main.css" },
+    { "source": "/app.js", "destination": "/app.js" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
